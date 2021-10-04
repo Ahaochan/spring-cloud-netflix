@@ -83,6 +83,8 @@ public class RibbonAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public SpringClientFactory springClientFactory() {
+		// 每个Service有独立的Spring Application Context上下文
+		// 资源隔离, 独立配置
 		SpringClientFactory factory = new SpringClientFactory();
 		factory.setConfigurations(this.configurations);
 		return factory;
@@ -91,6 +93,7 @@ public class RibbonAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(LoadBalancerClient.class)
 	public LoadBalancerClient loadBalancerClient() {
+		// 创建LoadBalancerClient，用来被LoadBalancerInterceptor去代理RestTemplate请求
 		return new RibbonLoadBalancerClient(springClientFactory());
 	}
 
