@@ -193,6 +193,7 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 	}
 
 	protected ILoadBalancer getLoadBalancer(String serviceId) {
+		// 由RibbonAutoConfiguration初始化
 		return this.clientFactory.getLoadBalancer(serviceId);
 	}
 

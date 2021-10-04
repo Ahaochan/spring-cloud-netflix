@@ -33,6 +33,7 @@ public class RibbonClientConfigurationRegistrar implements ImportBeanDefinitionR
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata metadata,
 			BeanDefinitionRegistry registry) {
+		// 1. 遍历注册@RibbonClient中的ribbon配置到spring上下文
 		Map<String, Object> attrs = metadata
 				.getAnnotationAttributes(RibbonClients.class.getName(), true);
 		if (attrs != null && attrs.containsKey("value")) {
@@ -42,6 +43,7 @@ public class RibbonClientConfigurationRegistrar implements ImportBeanDefinitionR
 						client.get("configuration"));
 			}
 		}
+		// 2. 注册默认ribbon配置到spring上下文
 		if (attrs != null && attrs.containsKey("defaultConfiguration")) {
 			String name;
 			if (metadata.hasEnclosingClass()) {
@@ -53,6 +55,7 @@ public class RibbonClientConfigurationRegistrar implements ImportBeanDefinitionR
 			registerClientConfiguration(registry, name,
 					attrs.get("defaultConfiguration"));
 		}
+		// 3. 注册@RibbonClient中的ribbon配置到spring上下文
 		Map<String, Object> client = metadata
 				.getAnnotationAttributes(RibbonClient.class.getName(), true);
 		String name = getClientName(client);

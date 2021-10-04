@@ -36,6 +36,7 @@ import org.springframework.context.annotation.Import;
 @Target({ ElementType.TYPE })
 @Documented
 @Import(RibbonClientConfigurationRegistrar.class)
+// 被@RibbonClients修饰的类, 都会执行RibbonClientConfigurationRegistrar
 public @interface RibbonClients {
 
 	RibbonClient[] value() default {};

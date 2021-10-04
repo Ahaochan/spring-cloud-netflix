@@ -40,6 +40,7 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 	static final String NAMESPACE = "ribbon";
 
 	public SpringClientFactory() {
+		// 为每个spring上下文注册默认配置类RibbonClientConfiguration
 		super(RibbonClientConfiguration.class, NAMESPACE, "ribbon.client.name");
 	}
 

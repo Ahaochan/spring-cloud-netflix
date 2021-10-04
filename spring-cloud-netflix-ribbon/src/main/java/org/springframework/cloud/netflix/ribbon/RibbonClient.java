@@ -41,6 +41,7 @@ import org.springframework.context.annotation.Import;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+// 被@RibbonClient修饰的类, 都会执行RibbonClientConfigurationRegistrar
 public @interface RibbonClient {
 
 	/**

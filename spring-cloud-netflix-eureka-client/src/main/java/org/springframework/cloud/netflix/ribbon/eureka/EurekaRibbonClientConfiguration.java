@@ -53,6 +53,7 @@ import org.springframework.util.StringUtils;
  * @author Ryan Baxter
  */
 @Configuration(proxyBeanMethods = false)
+// 在RibbonEurekaAutoConfiguration中通过@RibbonClients被注入
 public class EurekaRibbonClientConfiguration {
 
 	private static final Log log = LogFactory

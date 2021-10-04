@@ -86,6 +86,7 @@ public class RibbonAutoConfiguration {
 		// 每个Service有独立的Spring Application Context上下文
 		// 资源隔离, 独立配置
 		SpringClientFactory factory = new SpringClientFactory();
+		// 这里注入所有被@RibbonClients和@RibbonClient修饰的Bean
 		factory.setConfigurations(this.configurations);
 		return factory;
 	}

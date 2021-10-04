@@ -71,6 +71,7 @@ import static org.springframework.cloud.netflix.ribbon.RibbonUtils.updateToSecur
 // https://github.com/spring-cloud/spring-cloud-netflix/issues/2086#issuecomment-316281653
 @Import({ HttpClientConfiguration.class, OkHttpRibbonConfiguration.class,
 		RestClientRibbonConfiguration.class, HttpClientRibbonConfiguration.class })
+// 由SpringClientFactory在构造函数中注入配置
 public class RibbonClientConfiguration {
 
 	/**
@@ -89,6 +90,7 @@ public class RibbonClientConfiguration {
 	public static final boolean DEFAULT_GZIP_PAYLOAD = true;
 
 	@RibbonClientName
+	// 等价于@Value("${ribbon.client.name}"), 这里其实就是每个服务的名称serviceA
 	private String name = "client";
 
 	// TODO: maybe re-instate autowired load balancers: identified by name they could be
@@ -169,6 +171,7 @@ public class RibbonClientConfiguration {
 		if (this.propertiesFactory.isSet(ILoadBalancer.class, name)) {
 			return this.propertiesFactory.get(ILoadBalancer.class, config, name);
 		}
+		// 每个服务都初始化自己的负载均衡器
 		return new ZoneAwareLoadBalancer<>(config, rule, ping, serverList,
 				serverListFilter, serverListUpdater);
 	}
