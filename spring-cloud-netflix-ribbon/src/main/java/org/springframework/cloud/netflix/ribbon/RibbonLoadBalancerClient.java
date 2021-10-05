@@ -144,6 +144,8 @@ public class RibbonLoadBalancerClient implements LoadBalancerClient {
 		RibbonStatsRecorder statsRecorder = new RibbonStatsRecorder(context, server);
 
 		try {
+			// serviceInstance是经过负载均衡算法选择出来的一个服务实例
+			// request是在LoadBalancerInterceptor中创建的请求包装类
 			T returnVal = request.apply(serviceInstance);
 			statsRecorder.recordStats(returnVal);
 			return returnVal;
