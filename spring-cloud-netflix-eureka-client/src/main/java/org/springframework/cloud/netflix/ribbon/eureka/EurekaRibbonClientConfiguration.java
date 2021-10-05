@@ -89,6 +89,7 @@ public class EurekaRibbonClientConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public IPing ribbonPing(IClientConfig config) {
+		// 这里的serviceId就是服务名serviceA
 		if (this.propertiesFactory.isSet(IPing.class, serviceId)) {
 			return this.propertiesFactory.get(IPing.class, config, serviceId);
 		}

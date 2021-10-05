@@ -132,7 +132,7 @@ public class RibbonClientConfiguration {
 		if (this.propertiesFactory.isSet(IRule.class, name)) {
 			return this.propertiesFactory.get(IRule.class, config, name);
 		}
-		// 默认是没有配置IRule的, 所以默认负载均衡规则的实现类是ZoneAvoidanceRule
+		// 默认配置是没有IRule的, 所以默认负载均衡规则的实现类是ZoneAvoidanceRule
 		ZoneAvoidanceRule rule = new ZoneAvoidanceRule();
 		rule.initWithNiwsConfig(config);
 		return rule;
@@ -141,9 +141,14 @@ public class RibbonClientConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public IPing ribbonPing(IClientConfig config) {
+		// 这里的name就是服务名serviceA
 		if (this.propertiesFactory.isSet(IPing.class, name)) {
 			return this.propertiesFactory.get(IPing.class, config, name);
 		}
+		// 默认配置是没有IPing的, 所以默认Ping的实现类是DummyPing
+		// 这个DummyPing是空实现, 相当于没有Ping
+		// 是交由EurekaRibbonClientConfiguration的NIWSDiscoveryPing去实现的
+		// 由Eureka自己去做故障发现
 		return new DummyPing();
 	}
 
