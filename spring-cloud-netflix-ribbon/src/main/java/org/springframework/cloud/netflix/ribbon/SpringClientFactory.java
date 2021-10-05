@@ -95,6 +95,7 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 		C result = null;
 
 		try {
+			// 寻找含有IClientConfig作为参数的构造函数, 进行初始化
 			Constructor<C> constructor = clazz.getConstructor(IClientConfig.class);
 			result = constructor.newInstance(config);
 		}
@@ -102,6 +103,7 @@ public class SpringClientFactory extends NamedContextFactory<RibbonClientSpecifi
 			// Ignored
 		}
 
+		// 如果构造函数没有IClientConfig, 就用默认构造函数初始化
 		if (result == null) {
 			result = BeanUtils.instantiateClass(clazz);
 

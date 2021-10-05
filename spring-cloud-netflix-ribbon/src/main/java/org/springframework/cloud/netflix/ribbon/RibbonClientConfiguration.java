@@ -128,9 +128,11 @@ public class RibbonClientConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public IRule ribbonRule(IClientConfig config) {
+		// 这里的name就是服务名serviceA
 		if (this.propertiesFactory.isSet(IRule.class, name)) {
 			return this.propertiesFactory.get(IRule.class, config, name);
 		}
+		// 默认是没有配置IRule的, 所以默认负载均衡规则的实现类是ZoneAvoidanceRule
 		ZoneAvoidanceRule rule = new ZoneAvoidanceRule();
 		rule.initWithNiwsConfig(config);
 		return rule;

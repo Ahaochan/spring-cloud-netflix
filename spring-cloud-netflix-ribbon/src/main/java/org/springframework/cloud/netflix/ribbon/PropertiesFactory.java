@@ -55,8 +55,11 @@ public class PropertiesFactory {
 	}
 
 	public String getClassName(Class clazz, String name) {
+		// 这里的name是服务名serviceA, 传入的class是IRule
 		if (this.classToProperty.containsKey(clazz)) {
+			// 获取内置的类名对应的属性名
 			String classNameProperty = this.classToProperty.get(clazz);
+			// 获取配置文件中这个属性名对应的值, 用来做初始化操作
 			String className = environment
 					.getProperty(name + "." + NAMESPACE + "." + classNameProperty);
 			return className;
@@ -66,10 +69,12 @@ public class PropertiesFactory {
 
 	@SuppressWarnings("unchecked")
 	public <C> C get(Class<C> clazz, IClientConfig config, String name) {
+		// 获取配置文件中这个属性名对应的值, 用来做初始化操作
 		String className = getClassName(clazz, name);
 		if (StringUtils.hasText(className)) {
 			try {
 				Class<?> toInstantiate = Class.forName(className);
+				// 使用IClientConfig进行初始化
 				return (C) SpringClientFactory.instantiateWithConfig(toInstantiate,
 						config);
 			}
