@@ -68,6 +68,12 @@ public class Servlet30WrapperFilter extends ZuulFilter {
 		return true; // TODO: only if in servlet 3.0 env
 	}
 
+	// ServletDetectionFilter(-3) -> Servlet30WrapperFilter(-2) -> FormBodyWrapperFilter(-1) -> DebugFilter(1) -> PreDecorationFilter(5)
+	// ServletDetectionFilter(-3): 往RequestContext设置isDispatcherServletRequest=true, 就没做什么了
+	// Servlet30WrapperFilter(-2): 将HttpServletRequest用Servlet30RequestWrapper包装了一下, 装饰模式, 修复之前不能getRequest()不能获取原生HttpServletRequest的bug
+	// FormBodyWrapperFilter(-1): 正常不执行, 只处理contentType为application/x-www-form-urlencoded或者multipart/form-data的非get请求, 也是对request做包装
+	// DebugFilter(1): 正常不执行, url参数有?debug=true才能执行这个过滤器, 用来开启debug模式, 后面打印一些debug日志
+	// PreDecorationFilter(5): 根据uri匹配application.yml中的路由规则, 将对应的配置设置到RequestContext或者请求头里
 	@Override
 	public Object run() {
 		RequestContext ctx = RequestContext.getCurrentContext();
@@ -75,10 +81,12 @@ public class Servlet30WrapperFilter extends ZuulFilter {
 		if (request instanceof HttpServletRequestWrapper) {
 			request = (HttpServletRequest) ReflectionUtils.getField(this.requestField,
 					request);
+			// 将HttpServletRequest用Servlet30RequestWrapper包装了一下, 装饰模式, 修复之前不能getRequest()不能获取原生HttpServletRequest的bug
 			ctx.setRequest(new Servlet30RequestWrapper(request));
 		}
 		else if (RequestUtils.isDispatcherServletRequest()) {
 			// If it's going through the dispatcher we need to buffer the body
+			// 将HttpServletRequest用Servlet30RequestWrapper包装了一下, 装饰模式, 修复之前不能getRequest()不能获取原生HttpServletRequest的bug
 			ctx.setRequest(new Servlet30RequestWrapper(request));
 		}
 		return null;

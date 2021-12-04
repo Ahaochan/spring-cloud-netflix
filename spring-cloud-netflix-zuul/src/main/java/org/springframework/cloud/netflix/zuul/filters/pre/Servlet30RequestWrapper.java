@@ -39,6 +39,8 @@ class Servlet30RequestWrapper extends HttpServletRequestWrapper {
 	 */
 	@Override
 	public HttpServletRequest getRequest() {
+		// 之前的返回的Request不是原生的HttpServletRequest, 所以在spring cloud netflix中重写了Servlet30RequestWrapper的getRequest()方法
+		// 之前返回的是 return new HttpServletRequestWrapper(req, contentData, parameters);
 		return this.request;
 	}
 
