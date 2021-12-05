@@ -211,6 +211,7 @@ public class SimpleHostRoutingFilter extends ZuulFilter
 
 	@Override
 	public boolean shouldFilter() {
+		// 这三个route过滤器只有一个能执行
 		return RequestContext.getCurrentContext().getRouteHost() != null
 				&& RequestContext.getCurrentContext().sendZuulResponse();
 	}

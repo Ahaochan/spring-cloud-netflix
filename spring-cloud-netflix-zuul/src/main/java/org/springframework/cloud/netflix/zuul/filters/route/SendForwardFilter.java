@@ -51,6 +51,7 @@ public class SendForwardFilter extends ZuulFilter {
 
 	@Override
 	public boolean shouldFilter() {
+		// 这三个route过滤器只有一个能执行
 		RequestContext ctx = RequestContext.getCurrentContext();
 		return ctx.containsKey(FORWARD_TO_KEY)
 				&& !ctx.getBoolean(SEND_FORWARD_FILTER_RAN, false);

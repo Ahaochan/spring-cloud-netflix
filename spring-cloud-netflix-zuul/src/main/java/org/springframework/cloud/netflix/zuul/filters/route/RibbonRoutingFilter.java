@@ -105,6 +105,7 @@ public class RibbonRoutingFilter extends ZuulFilter {
 
 	@Override
 	public boolean shouldFilter() {
+		// 这三个route过滤器只有一个能执行
 		RequestContext ctx = RequestContext.getCurrentContext();
 		return (ctx.getRouteHost() == null && ctx.get(SERVICE_ID_KEY) != null
 				&& ctx.sendZuulResponse());
