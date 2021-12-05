@@ -56,6 +56,10 @@ public class SendForwardFilter extends ZuulFilter {
 				&& !ctx.getBoolean(SEND_FORWARD_FILTER_RAN, false);
 	}
 
+	// RibbonRoutingFilter(10) -> SimpleHostRoutingFilter(100) -> SendForwardFilter(500)
+	// RibbonRoutingFilter(10): 将请求转发到服务
+	// SimpleHostRoutingFilter(100): 将请求转发到这个服务的url地址上
+	// SendForwardFilter(500): 将请求转发到zuul自己的一个接口上去
 	@Override
 	public Object run() {
 		try {

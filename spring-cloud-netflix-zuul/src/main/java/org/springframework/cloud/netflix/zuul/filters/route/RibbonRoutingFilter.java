@@ -110,12 +110,17 @@ public class RibbonRoutingFilter extends ZuulFilter {
 				&& ctx.sendZuulResponse());
 	}
 
+	// RibbonRoutingFilter(10) -> SimpleHostRoutingFilter(100) -> SendForwardFilter(500)
+	// RibbonRoutingFilter(10): 将请求转发到服务
+	// SimpleHostRoutingFilter(100): 将请求转发到这个服务的url地址上
+	// SendForwardFilter(500): 将请求转发到zuul自己的一个接口上去
 	@Override
 	public Object run() {
 		RequestContext context = RequestContext.getCurrentContext();
 		this.helper.addIgnoredHeaders();
 		try {
 			RibbonCommandContext commandContext = buildCommandContext(context);
+			// 基于ribbon完成负载均衡，选择一个实例, 将请求封装在hystrix中来发送
 			ClientHttpResponse response = forward(commandContext);
 			setResponse(response);
 			return response;
