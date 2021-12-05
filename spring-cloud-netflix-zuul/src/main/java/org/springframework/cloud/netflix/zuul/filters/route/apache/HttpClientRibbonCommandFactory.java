@@ -52,11 +52,16 @@ public class HttpClientRibbonCommandFactory extends AbstractRibbonCommandFactory
 	public HttpClientRibbonCommand create(final RibbonCommandContext context) {
 		FallbackProvider zuulFallbackProvider = getFallbackProvider(
 				context.getServiceId());
+
+		// 获取服务名
 		final String serviceId = context.getServiceId();
+		// 从某个服务的Spring上下文获取RibbonLoadBalancingHttpClient这个Bean, 默认是HttpClientRibbonConfiguration创建的共用的Bean
 		final RibbonLoadBalancingHttpClient client = this.clientFactory
 				.getClient(serviceId, RibbonLoadBalancingHttpClient.class);
+		// 从某个服务的Spring上下文获取ILoadBalancer这个Bean, 就是Ribbon的逻辑了
 		client.setLoadBalancer(this.clientFactory.getLoadBalancer(serviceId));
 
+		// 父类的父类是HystrixCommand
 		return new HttpClientRibbonCommand(serviceId, client, context, zuulProperties,
 				zuulFallbackProvider, clientFactory.getClientConfig(serviceId));
 	}

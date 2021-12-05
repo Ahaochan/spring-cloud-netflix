@@ -210,6 +210,7 @@ public abstract class AbstractRibbonCommand<LBC extends AbstractLoadBalancerAwar
 		RQ request = createRequest();
 		RS response;
 
+		// 默认实现类是RibbonLoadBalancingHttpClient, isClientRetryable默认false不重试
 		boolean retryableClient = this.client instanceof AbstractLoadBalancingClient
 				&& ((AbstractLoadBalancingClient) this.client)
 						.isClientRetryable((ContextAwareRequest) request);
@@ -218,8 +219,10 @@ public abstract class AbstractRibbonCommand<LBC extends AbstractLoadBalancerAwar
 			response = this.client.execute(request, config);
 		}
 		else {
+			// 默认走这里, ribbon里的代码ZoneAwareLoadBalancer
 			response = this.client.executeWithLoadBalancer(request, config);
 		}
+		// 将响应体存入上下文中
 		context.set("ribbonResponse", response);
 
 		// Explicitly close the HttpResponse if the Hystrix command timed out to

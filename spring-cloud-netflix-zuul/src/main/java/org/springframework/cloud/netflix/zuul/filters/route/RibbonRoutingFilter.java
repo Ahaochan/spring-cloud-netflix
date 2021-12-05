@@ -167,6 +167,7 @@ public class RibbonRoutingFilter extends ZuulFilter {
 				context.getUri(), context.getHeaders(), context.getParams(),
 				context.getRequestEntity());
 
+		// 默认实现类是HttpClientRibbonCommandFactory
 		RibbonCommand command = this.ribbonCommandFactory.create(context);
 		try {
 			ClientHttpResponse response = command.execute();
