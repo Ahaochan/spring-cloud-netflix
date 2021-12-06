@@ -90,7 +90,7 @@ public class SendErrorFilter extends ZuulFilter {
 						exception.getErrorCause());
 			}
 
-			// 报错的时候, 就转发到/error上
+			// 报错的时候, 就转发到/error上, 默认实现类是BasicErrorController
 			RequestDispatcher dispatcher = request.getRequestDispatcher(this.errorPath);
 			if (dispatcher != null) {
 				ctx.set(SEND_ERROR_FILTER_RAN, true);
