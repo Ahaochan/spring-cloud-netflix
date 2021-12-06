@@ -105,6 +105,9 @@ public class SendResponseFilter extends ZuulFilter {
 						|| context.getResponseBody() != null);
 	}
 
+	// LocationRewriteFilter(900) -> SendResponseFilter(1000)
+	// LocationRewriteFilter(900): 只有状态码是3xx的响应才会走这个过滤器
+	// SendResponseFilter(1000): 将响应结果发送给浏览器
 	@Override
 	public Object run() {
 		try {
