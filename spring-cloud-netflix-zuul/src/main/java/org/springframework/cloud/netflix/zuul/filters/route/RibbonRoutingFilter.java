@@ -148,6 +148,7 @@ public class RibbonRoutingFilter extends ZuulFilter {
 		}
 
 		String serviceId = (String) context.get(SERVICE_ID_KEY);
+		// 在PreDecorationFilter中读取匹配到的route规则的重试配置, 比如zuul.retryable=true
 		Boolean retryable = (Boolean) context.get(RETRYABLE_KEY);
 		Object loadBalancerKey = context.get(LOAD_BALANCER_KEY);
 
@@ -159,6 +160,7 @@ public class RibbonRoutingFilter extends ZuulFilter {
 		long contentLength = useServlet31 ? request.getContentLengthLong()
 				: request.getContentLength();
 
+		// 这个RibbonCommandContext就是给下面的forward方法的参数
 		return new RibbonCommandContext(serviceId, verb, uri, retryable, headers, params,
 				requestEntity, this.requestCustomizers, contentLength, loadBalancerKey);
 	}
@@ -169,6 +171,7 @@ public class RibbonRoutingFilter extends ZuulFilter {
 				context.getRequestEntity());
 
 		// 默认实现类是HttpClientRibbonCommandFactory, 产生的HttpClientRibbonCommand实际上就是HystrixCommand
+		// context的retryable属性最终会传递到AbstractRibbonCommand里
 		RibbonCommand command = this.ribbonCommandFactory.create(context);
 		try {
 			ClientHttpResponse response = command.execute();

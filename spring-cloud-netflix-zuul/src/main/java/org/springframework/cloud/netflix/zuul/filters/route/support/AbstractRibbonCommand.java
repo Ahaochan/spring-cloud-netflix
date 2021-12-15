@@ -211,11 +211,14 @@ public abstract class AbstractRibbonCommand<LBC extends AbstractLoadBalancerAwar
 		RS response;
 
 		// 默认实现类是RibbonLoadBalancingHttpClient, isClientRetryable默认false不重试
+		// 如果使用了spring-retry依赖, 这里的实现类就是HttpClientRibbonConfiguration类创建的RetryableRibbonLoadBalancingHttpClient
 		boolean retryableClient = this.client instanceof AbstractLoadBalancingClient
 				&& ((AbstractLoadBalancingClient) this.client)
+						// 这里会去读取request的context里的retryable属性
 						.isClientRetryable((ContextAwareRequest) request);
 
 		if (retryableClient) {
+			// 如果配置了zuul.retryable=true, 就会走这里, client实现类是RetryableRibbonLoadBalancingHttpClient
 			response = this.client.execute(request, config);
 		}
 		else {
