@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -38,6 +38,7 @@ import com.netflix.discovery.shared.Applications;
 import com.netflix.discovery.shared.resolver.EurekaEndpoint;
 import com.netflix.discovery.shared.transport.EurekaHttpClient;
 import com.netflix.discovery.shared.transport.TransportClientFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
@@ -49,6 +50,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Provides the custom {@link WebClient.Builder} required by the
@@ -57,6 +59,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  *
  * @author Daniel Lavoie
  * @author Haytham Mohamed
+ * @author Armin Krezovic
  */
 public class WebClientTransportClientFactory implements TransportClientFactory {
 
@@ -77,14 +80,14 @@ public class WebClientTransportClientFactory implements TransportClientFactory {
 	}
 
 	private WebClient.Builder setUrl(WebClient.Builder builder, String serviceUrl) {
-		String url = serviceUrl;
+		String url = UriComponentsBuilder.fromUriString(serviceUrl).userInfo(null).toUriString();
+
 		try {
 			URI serviceURI = new URI(serviceUrl);
 			if (serviceURI.getUserInfo() != null) {
 				String[] credentials = serviceURI.getUserInfo().split(":");
 				if (credentials.length == 2) {
 					builder.filter(ExchangeFilterFunctions.basicAuthentication(credentials[0], credentials[1]));
-					url = serviceUrl.replace(credentials[0] + ":" + credentials[1] + "@", "");
 				}
 			}
 		}
@@ -122,13 +125,13 @@ public class WebClientTransportClientFactory implements TransportClientFactory {
 	 * serialized or deserialized. Achieved with
 	 * {@link SerializationFeature#WRAP_ROOT_VALUE} and
 	 * {@link DeserializationFeature#UNWRAP_ROOT_VALUE}.
-	 * {@link PropertyNamingStrategy.SnakeCaseStrategy} is applied to the underlying
+	 * {@link PropertyNamingStrategies.SnakeCaseStrategy} is applied to the underlying
 	 * {@link ObjectMapper}.
 	 * @return a {@link ObjectMapper} object
 	 */
 	private ObjectMapper objectMapper() {
 		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+		objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
 		SimpleModule jsonModule = new SimpleModule();
 		jsonModule.setSerializerModifier(createJsonSerializerModifier());
@@ -147,8 +150,16 @@ public class WebClientTransportClientFactory implements TransportClientFactory {
 		return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
 			// literally 400 pass the tests, not 4xxClientError
 			if (clientResponse.statusCode().value() == 400) {
-				ClientResponse newResponse = ClientResponse.from(clientResponse).statusCode(HttpStatus.OK).build();
+				ClientResponse newResponse = clientResponse.mutate().statusCode(HttpStatus.OK).build();
 				newResponse.body((clientHttpResponse, context) -> clientHttpResponse.getBody());
+				return Mono.just(newResponse);
+			}
+			if (clientResponse.statusCode().equals(HttpStatus.NOT_FOUND)) {
+				ClientResponse newResponse = clientResponse.mutate()
+					.statusCode(clientResponse.statusCode())
+					// ignore body on 404 for heartbeat, see gh-4145
+					.body(Flux.empty())
+					.build();
 				return Mono.just(newResponse);
 			}
 			return Mono.just(clientResponse);

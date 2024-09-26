@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import javax.net.ssl.SSLContext;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClientConfig;
 import com.netflix.discovery.shared.transport.TransportClientFactory;
-import com.netflix.discovery.shared.transport.jersey.EurekaJerseyClient;
 import com.netflix.discovery.shared.transport.jersey.TransportClientFactories;
 
 import org.springframework.web.reactive.function.client.WebClient;
@@ -41,12 +40,6 @@ public class WebClientTransportClientFactories implements TransportClientFactori
 
 	public WebClientTransportClientFactories(Supplier<WebClient.Builder> builder) {
 		this.builder = builder;
-	}
-
-	@Override
-	public TransportClientFactory newTransportClientFactory(Collection<Void> additionalFilters,
-			EurekaJerseyClient providedJerseyClient) {
-		throw new UnsupportedOperationException();
 	}
 
 	@Override

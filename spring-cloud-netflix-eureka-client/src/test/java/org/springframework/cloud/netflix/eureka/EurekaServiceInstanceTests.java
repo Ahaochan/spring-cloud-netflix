@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,11 @@ class EurekaServiceInstanceTests {
 
 	@Test
 	void getSchemeReturnsNonNull() {
-		InstanceInfo instanceInfo = InstanceInfo.Builder.newBuilder().setAppName("test").setHostName("myhost")
-				.setPort(8080).build();
+		InstanceInfo instanceInfo = InstanceInfo.Builder.newBuilder()
+			.setAppName("test")
+			.setHostName("myhost")
+			.setPort(8080)
+			.build();
 		EurekaServiceInstance instance = new EurekaServiceInstance(instanceInfo);
 		Assertions.assertThat(instance.getScheme()).isEqualTo("http");
 	}

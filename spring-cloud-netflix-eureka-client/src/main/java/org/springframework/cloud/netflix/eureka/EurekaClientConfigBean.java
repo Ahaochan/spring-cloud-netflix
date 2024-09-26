@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Objects;
 import com.netflix.appinfo.EurekaAccept;
 import com.netflix.discovery.EurekaClientConfig;
 import com.netflix.discovery.shared.transport.EurekaTransportConfig;
+import org.apache.hc.client5.http.classic.HttpClient;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -126,14 +127,14 @@ public class EurekaClientConfigBean implements EurekaClientConfig, Ordered {
 	/**
 	 * Indicates how long to wait (in seconds) before a connection to eureka server needs
 	 * to timeout. Note that the connections in the client are pooled by
-	 * org.apache.http.client.HttpClient and this setting affects the actual connection
-	 * creation and also the wait time to get the connection from the pool.
+	 * {@link HttpClient} and this setting affects the actual connection creation and also
+	 * the wait time to get the connection from the pool.
 	 */
 	private int eurekaServerConnectTimeoutSeconds = 5;
 
 	/**
 	 * Gets the name of the implementation which implements BackupRegistry to fetch the
-	 * registry information as a fall back option for only the first time when the eureka
+	 * registry information as a fallback option for only the first time when the eureka
 	 * client starts.
 	 *
 	 * This may be needed for applications which needs additional resiliency for registry
@@ -472,7 +473,7 @@ public class EurekaClientConfigBean implements EurekaClientConfig, Ordered {
 		if (serviceUrls == null || serviceUrls.isEmpty()) {
 			serviceUrls = this.serviceUrl.get(DEFAULT_ZONE);
 		}
-		if (!StringUtils.isEmpty(serviceUrls)) {
+		if (StringUtils.hasText(serviceUrls)) {
 			final String[] serviceUrlsSplit = StringUtils.commaDelimitedListToStringArray(serviceUrls);
 			List<String> eurekaServiceUrls = new ArrayList<>(serviceUrlsSplit.length);
 			for (String eurekaServiceUrl : serviceUrlsSplit) {
@@ -997,47 +998,147 @@ public class EurekaClientConfigBean implements EurekaClientConfig, Ordered {
 
 	@Override
 	public String toString() {
-		return new StringBuilder("EurekaClientConfigBean{").append("propertyResolver=").append(propertyResolver)
-				.append(", ").append("enabled=").append(enabled).append(", ").append("transport=").append(transport)
-				.append(", ").append("registryFetchIntervalSeconds=").append(registryFetchIntervalSeconds).append(", ")
-				.append("instanceInfoReplicationIntervalSeconds=").append(instanceInfoReplicationIntervalSeconds)
-				.append(", ").append("initialInstanceInfoReplicationIntervalSeconds=")
-				.append(initialInstanceInfoReplicationIntervalSeconds).append(", ")
-				.append("eurekaServiceUrlPollIntervalSeconds=").append(eurekaServiceUrlPollIntervalSeconds).append(", ")
-				.append("proxyPort='").append(proxyPort).append("', ").append("proxyHost='").append(proxyHost)
-				.append("', ").append("proxyUserName='").append(proxyUserName).append("', ").append("proxyPassword='")
-				.append(proxyPassword).append("', ").append("eurekaServerReadTimeoutSeconds=")
-				.append(eurekaServerReadTimeoutSeconds).append(", ").append("eurekaServerConnectTimeoutSeconds=")
-				.append(eurekaServerConnectTimeoutSeconds).append(", ").append("backupRegistryImpl='")
-				.append(backupRegistryImpl).append("', ").append("eurekaServerTotalConnections=")
-				.append(eurekaServerTotalConnections).append(", ").append("eurekaServerTotalConnectionsPerHost=")
-				.append(eurekaServerTotalConnectionsPerHost).append(", ").append("eurekaServerURLContext='")
-				.append(eurekaServerURLContext).append("', ").append("eurekaServerPort='").append(eurekaServerPort)
-				.append("', ").append("eurekaServerDNSName='").append(eurekaServerDNSName).append("', ")
-				.append("region='").append(region).append("', ").append("eurekaConnectionIdleTimeoutSeconds=")
-				.append(eurekaConnectionIdleTimeoutSeconds).append(", ").append("registryRefreshSingleVipAddress='")
-				.append(registryRefreshSingleVipAddress).append("', ").append("heartbeatExecutorThreadPoolSize=")
-				.append(heartbeatExecutorThreadPoolSize).append(", ")
-				.append("heartbeatExecutorExponentialBackOffBound=").append(heartbeatExecutorExponentialBackOffBound)
-				.append(", ").append("cacheRefreshExecutorThreadPoolSize=").append(cacheRefreshExecutorThreadPoolSize)
-				.append(", ").append("cacheRefreshExecutorExponentialBackOffBound=")
-				.append(cacheRefreshExecutorExponentialBackOffBound).append(", ").append("serviceUrl=")
-				.append(serviceUrl).append(", ").append("gZipContent=").append(gZipContent).append(", ")
-				.append("useDnsForFetchingServiceUrls=").append(useDnsForFetchingServiceUrls).append(", ")
-				.append("registerWithEureka=").append(registerWithEureka).append(", ").append("preferSameZoneEureka=")
-				.append(preferSameZoneEureka).append(", ").append("logDeltaDiff=").append(logDeltaDiff).append(", ")
-				.append("disableDelta=").append(disableDelta).append(", ").append("fetchRemoteRegionsRegistry='")
-				.append(fetchRemoteRegionsRegistry).append("', ").append("availabilityZones=").append(availabilityZones)
-				.append(", ").append("filterOnlyUpInstances=").append(filterOnlyUpInstances).append(", ")
-				.append("fetchRegistry=").append(fetchRegistry).append(", ").append("dollarReplacement='")
-				.append(dollarReplacement).append("', ").append("escapeCharReplacement='").append(escapeCharReplacement)
-				.append("', ").append("allowRedirects=").append(allowRedirects).append(", ")
-				.append("onDemandUpdateStatusChange=").append(onDemandUpdateStatusChange).append(", ")
-				.append("encoderName='").append(encoderName).append("', ").append("decoderName='").append(decoderName)
-				.append("', ").append("clientDataAccept='").append(clientDataAccept).append("', ")
-				.append("shouldUnregisterOnShutdown='").append(shouldUnregisterOnShutdown)
-				.append("shouldEnforceRegistrationAtInit='").append(shouldEnforceRegistrationAtInit).append("', ")
-				.append("order='").append(order).append("'}").toString();
+		return new StringBuilder("EurekaClientConfigBean{").append("propertyResolver=")
+			.append(propertyResolver)
+			.append(", ")
+			.append("enabled=")
+			.append(enabled)
+			.append(", ")
+			.append("transport=")
+			.append(transport)
+			.append(", ")
+			.append("registryFetchIntervalSeconds=")
+			.append(registryFetchIntervalSeconds)
+			.append(", ")
+			.append("instanceInfoReplicationIntervalSeconds=")
+			.append(instanceInfoReplicationIntervalSeconds)
+			.append(", ")
+			.append("initialInstanceInfoReplicationIntervalSeconds=")
+			.append(initialInstanceInfoReplicationIntervalSeconds)
+			.append(", ")
+			.append("eurekaServiceUrlPollIntervalSeconds=")
+			.append(eurekaServiceUrlPollIntervalSeconds)
+			.append(", ")
+			.append("proxyPort='")
+			.append(proxyPort)
+			.append("', ")
+			.append("proxyHost='")
+			.append(proxyHost)
+			.append("', ")
+			.append("proxyUserName='")
+			.append(proxyUserName)
+			.append("', ")
+			.append("proxyPassword='")
+			.append(proxyPassword)
+			.append("', ")
+			.append("eurekaServerReadTimeoutSeconds=")
+			.append(eurekaServerReadTimeoutSeconds)
+			.append(", ")
+			.append("eurekaServerConnectTimeoutSeconds=")
+			.append(eurekaServerConnectTimeoutSeconds)
+			.append(", ")
+			.append("backupRegistryImpl='")
+			.append(backupRegistryImpl)
+			.append("', ")
+			.append("eurekaServerTotalConnections=")
+			.append(eurekaServerTotalConnections)
+			.append(", ")
+			.append("eurekaServerTotalConnectionsPerHost=")
+			.append(eurekaServerTotalConnectionsPerHost)
+			.append(", ")
+			.append("eurekaServerURLContext='")
+			.append(eurekaServerURLContext)
+			.append("', ")
+			.append("eurekaServerPort='")
+			.append(eurekaServerPort)
+			.append("', ")
+			.append("eurekaServerDNSName='")
+			.append(eurekaServerDNSName)
+			.append("', ")
+			.append("region='")
+			.append(region)
+			.append("', ")
+			.append("eurekaConnectionIdleTimeoutSeconds=")
+			.append(eurekaConnectionIdleTimeoutSeconds)
+			.append(", ")
+			.append("registryRefreshSingleVipAddress='")
+			.append(registryRefreshSingleVipAddress)
+			.append("', ")
+			.append("heartbeatExecutorThreadPoolSize=")
+			.append(heartbeatExecutorThreadPoolSize)
+			.append(", ")
+			.append("heartbeatExecutorExponentialBackOffBound=")
+			.append(heartbeatExecutorExponentialBackOffBound)
+			.append(", ")
+			.append("cacheRefreshExecutorThreadPoolSize=")
+			.append(cacheRefreshExecutorThreadPoolSize)
+			.append(", ")
+			.append("cacheRefreshExecutorExponentialBackOffBound=")
+			.append(cacheRefreshExecutorExponentialBackOffBound)
+			.append(", ")
+			.append("serviceUrl=")
+			.append(serviceUrl)
+			.append(", ")
+			.append("gZipContent=")
+			.append(gZipContent)
+			.append(", ")
+			.append("useDnsForFetchingServiceUrls=")
+			.append(useDnsForFetchingServiceUrls)
+			.append(", ")
+			.append("registerWithEureka=")
+			.append(registerWithEureka)
+			.append(", ")
+			.append("preferSameZoneEureka=")
+			.append(preferSameZoneEureka)
+			.append(", ")
+			.append("logDeltaDiff=")
+			.append(logDeltaDiff)
+			.append(", ")
+			.append("disableDelta=")
+			.append(disableDelta)
+			.append(", ")
+			.append("fetchRemoteRegionsRegistry='")
+			.append(fetchRemoteRegionsRegistry)
+			.append("', ")
+			.append("availabilityZones=")
+			.append(availabilityZones)
+			.append(", ")
+			.append("filterOnlyUpInstances=")
+			.append(filterOnlyUpInstances)
+			.append(", ")
+			.append("fetchRegistry=")
+			.append(fetchRegistry)
+			.append(", ")
+			.append("dollarReplacement='")
+			.append(dollarReplacement)
+			.append("', ")
+			.append("escapeCharReplacement='")
+			.append(escapeCharReplacement)
+			.append("', ")
+			.append("allowRedirects=")
+			.append(allowRedirects)
+			.append(", ")
+			.append("onDemandUpdateStatusChange=")
+			.append(onDemandUpdateStatusChange)
+			.append(", ")
+			.append("encoderName='")
+			.append(encoderName)
+			.append("', ")
+			.append("decoderName='")
+			.append(decoderName)
+			.append("', ")
+			.append("clientDataAccept='")
+			.append(clientDataAccept)
+			.append("', ")
+			.append("shouldUnregisterOnShutdown='")
+			.append(shouldUnregisterOnShutdown)
+			.append("shouldEnforceRegistrationAtInit='")
+			.append(shouldEnforceRegistrationAtInit)
+			.append("', ")
+			.append("order='")
+			.append(order)
+			.append("'}")
+			.toString();
 	}
 
 }

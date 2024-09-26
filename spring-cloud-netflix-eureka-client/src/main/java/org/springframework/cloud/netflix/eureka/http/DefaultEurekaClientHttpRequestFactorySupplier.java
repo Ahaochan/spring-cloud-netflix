@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,22 @@
 
 package org.springframework.cloud.netflix.eureka.http;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.util.Timeout;
 
+import org.springframework.cloud.netflix.eureka.RestTemplateTimeoutProperties;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
@@ -32,23 +41,71 @@ import org.springframework.lang.Nullable;
  * {@link HttpClients}.
  *
  * @author Marcin Grzejszczak
+ * @author Olga Maciaszek-Sharma
+ * @author Jiwon Jeon
  * @since 3.0.0
  */
 public class DefaultEurekaClientHttpRequestFactorySupplier implements EurekaClientHttpRequestFactorySupplier {
 
+	private final RestTemplateTimeoutProperties restTemplateTimeoutProperties;
+
+	/**
+	 * @deprecated in favour of
+	 * {@link DefaultEurekaClientHttpRequestFactorySupplier#DefaultEurekaClientHttpRequestFactorySupplier(RestTemplateTimeoutProperties)}
+	 */
+	@Deprecated
+	public DefaultEurekaClientHttpRequestFactorySupplier() {
+		this.restTemplateTimeoutProperties = new RestTemplateTimeoutProperties();
+	}
+
+	public DefaultEurekaClientHttpRequestFactorySupplier(RestTemplateTimeoutProperties restTemplateTimeoutProperties) {
+		this.restTemplateTimeoutProperties = restTemplateTimeoutProperties;
+	}
+
 	@Override
 	public ClientHttpRequestFactory get(SSLContext sslContext, @Nullable HostnameVerifier hostnameVerifier) {
-		HttpClientBuilder httpClientBuilder = HttpClients.custom();
-		if (sslContext != null) {
-			httpClientBuilder = httpClientBuilder.setSSLContext(sslContext);
+		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+		if (sslContext != null || hostnameVerifier != null || restTemplateTimeoutProperties != null) {
+			httpClientBuilder.setConnectionManager(
+					buildConnectionManager(sslContext, hostnameVerifier, restTemplateTimeoutProperties));
 		}
-		if (hostnameVerifier != null) {
-			httpClientBuilder = httpClientBuilder.setSSLHostnameVerifier(hostnameVerifier);
+		if (restTemplateTimeoutProperties != null) {
+			httpClientBuilder.setDefaultRequestConfig(buildRequestConfig());
 		}
+
 		CloseableHttpClient httpClient = httpClientBuilder.build();
 		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
 		requestFactory.setHttpClient(httpClient);
 		return requestFactory;
+	}
+
+	private HttpClientConnectionManager buildConnectionManager(SSLContext sslContext, HostnameVerifier hostnameVerifier,
+			RestTemplateTimeoutProperties restTemplateTimeoutProperties) {
+		PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder
+			.create();
+		SSLConnectionSocketFactoryBuilder sslConnectionSocketFactoryBuilder = SSLConnectionSocketFactoryBuilder
+			.create();
+		if (sslContext != null) {
+			sslConnectionSocketFactoryBuilder.setSslContext(sslContext);
+		}
+		if (hostnameVerifier != null) {
+			sslConnectionSocketFactoryBuilder.setHostnameVerifier(hostnameVerifier);
+		}
+		connectionManagerBuilder.setSSLSocketFactory(sslConnectionSocketFactoryBuilder.build());
+		if (restTemplateTimeoutProperties != null) {
+			connectionManagerBuilder.setDefaultSocketConfig(SocketConfig.custom()
+				.setSoTimeout(Timeout.of(restTemplateTimeoutProperties.getSocketTimeout(), TimeUnit.MILLISECONDS))
+				.build());
+		}
+		return connectionManagerBuilder.build();
+	}
+
+	private RequestConfig buildRequestConfig() {
+		return RequestConfig.custom()
+			.setConnectTimeout(Timeout.of(restTemplateTimeoutProperties.getConnectTimeout(), TimeUnit.MILLISECONDS))
+			.setConnectionRequestTimeout(
+					Timeout.of(restTemplateTimeoutProperties.getConnectRequestTimeout(), TimeUnit.MILLISECONDS))
+			.build();
 	}
 
 }

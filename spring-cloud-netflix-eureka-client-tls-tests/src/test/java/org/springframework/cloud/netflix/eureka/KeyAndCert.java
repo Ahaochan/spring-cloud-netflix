@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import java.security.cert.X509Certificate;
 
 public class KeyAndCert {
 
-	private KeyPair keyPair;
+	private final KeyPair keyPair;
 
-	private X509Certificate certificate;
+	private final X509Certificate certificate;
 
 	public KeyAndCert(KeyPair keyPair, X509Certificate certificate) {
 		this.keyPair = keyPair;
@@ -51,7 +51,7 @@ public class KeyAndCert {
 	}
 
 	public String subject() {
-		String dn = certificate.getSubjectDN().getName();
+		String dn = certificate.getSubjectX500Principal().getName();
 		int index = dn.indexOf('=');
 		return dn.substring(index + 1);
 	}

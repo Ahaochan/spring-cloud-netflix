@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.netflix.appinfo.AmazonInfo;
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.DataCenterInfo;
@@ -39,6 +37,7 @@ import com.netflix.eureka.registry.PeerAwareInstanceRegistry;
 import com.netflix.eureka.registry.PeerAwareInstanceRegistryImpl;
 import com.netflix.eureka.resources.StatusResource;
 import com.netflix.eureka.util.StatusInfo;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -48,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * @author Spencer Gibb
  * @author Gang Li
+ * @author Weix Sun
  */
 @Controller
 @RequestMapping("${eureka.dashboard.path:/}")
@@ -56,10 +56,13 @@ public class EurekaController {
 	@Value("${eureka.dashboard.path:/}")
 	private String dashboardPath = "";
 
-	private ApplicationInfoManager applicationInfoManager;
+	private final ApplicationInfoManager applicationInfoManager;
 
-	public EurekaController(ApplicationInfoManager applicationInfoManager) {
+	private final EurekaProperties eurekaProperties;
+
+	public EurekaController(ApplicationInfoManager applicationInfoManager, EurekaProperties eurekaProperties) {
 		this.applicationInfoManager = applicationInfoManager;
+		this.eurekaProperties = eurekaProperties;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -116,11 +119,11 @@ public class EurekaController {
 	private void populateHeader(Map<String, Object> model) {
 		model.put("currentTime", StatusResource.getCurrentTimeAsString());
 		model.put("upTime", StatusInfo.getUpTime());
-		model.put("environment", "N/A"); // FIXME:
-		model.put("datacenter", "N/A"); // FIXME:
+		model.put("environment", eurekaProperties.getEnvironment());
+		model.put("datacenter", eurekaProperties.getDatacenter());
 		PeerAwareInstanceRegistry registry = getRegistry();
 		model.put("registry", registry);
-		model.put("isBelowRenewThresold", registry.isBelowRenewThresold() == 1);
+		model.put("isBelowRenewThreshold", registry.isBelowRenewThresold() == 1);
 		DataCenterInfo info = applicationInfoManager.getInfo().getDataCenterInfo();
 		if (info.getName() == DataCenterInfo.Name.Amazon) {
 			AmazonInfo amazonInfo = (AmazonInfo) info;
@@ -198,7 +201,7 @@ public class EurekaController {
 			ArrayList<Map<String, Object>> instanceInfos = new ArrayList<>();
 			appData.put("instanceInfos", instanceInfos);
 			for (Map.Entry<InstanceInfo.InstanceStatus, List<Pair<String, String>>> entry : instancesByStatus
-					.entrySet()) {
+				.entrySet()) {
 				List<Pair<String, String>> value = entry.getValue();
 				InstanceInfo.InstanceStatus status = entry.getKey();
 				LinkedHashMap<String, Object> instanceData = new LinkedHashMap<>();

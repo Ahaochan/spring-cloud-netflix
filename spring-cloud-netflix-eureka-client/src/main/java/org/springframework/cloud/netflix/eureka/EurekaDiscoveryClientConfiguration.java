@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,8 +84,9 @@ public class EurekaDiscoveryClientConfiguration {
 		private EurekaAutoServiceRegistration autoRegistration;
 
 		public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
-			// This will force the creation of the EurkaClient bean if not already created
-			// to make sure the client will be reregistered after a refresh event
+			// This will force the creation of the EurekaClient bean if not already
+			// created
+			// to make sure the client will be re-registered after a refresh event
 			if (eurekaClient != null) {
 				eurekaClient.getApplications();
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,9 +98,19 @@ public class EurekaInstanceRenewedEvent extends ApplicationEvent {
 
 	@Override
 	public String toString() {
-		return new StringBuilder("EurekaInstanceRenewedEvent{").append("appName='").append(appName).append("', ")
-				.append("serverId='").append(serverId).append("', ").append("instanceInfo=").append(instanceInfo)
-				.append(", ").append("replication=").append(replication).append("}").toString();
+		return new StringBuilder("EurekaInstanceRenewedEvent{").append("appName='")
+			.append(appName)
+			.append("', ")
+			.append("serverId='")
+			.append(serverId)
+			.append("', ")
+			.append("instanceInfo=")
+			.append(instanceInfo)
+			.append(", ")
+			.append("replication=")
+			.append(replication)
+			.append("}")
+			.toString();
 	}
 
 }

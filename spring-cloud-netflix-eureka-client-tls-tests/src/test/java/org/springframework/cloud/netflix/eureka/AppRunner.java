@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.test.TestSocketUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.util.SocketUtils;
 
 public class AppRunner implements AutoCloseable {
 
-	private Class<?> appClass;
+	private final Class<?> appClass;
 
-	private Map<String, String> props;
+	private final Map<String, String> props;
 
 	private ConfigurableApplicationContext app;
 
@@ -56,7 +56,7 @@ public class AppRunner implements AutoCloseable {
 	}
 
 	private int availabeTcpPort() {
-		return SocketUtils.findAvailableTcpPort();
+		return TestSocketUtils.findAvailableTcpPort();
 	}
 
 	private String[] props() {

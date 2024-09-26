@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,20 +193,43 @@ public class CloudEurekaTransportConfig implements EurekaTransportConfig {
 	@Override
 	public String toString() {
 		return new StringBuilder("CloudEurekaTransportConfig{").append("sessionedClientReconnectIntervalSeconds=")
-				.append(sessionedClientReconnectIntervalSeconds).append(", ")
-				.append("retryableClientQuarantineRefreshPercentage=")
-				.append(retryableClientQuarantineRefreshPercentage).append(", ")
-				.append("bootstrapResolverRefreshIntervalSeconds=").append(bootstrapResolverRefreshIntervalSeconds)
-				.append(", ").append("applicationsResolverDataStalenessThresholdSeconds=")
-				.append(applicationsResolverDataStalenessThresholdSeconds).append(", ")
-				.append("asyncResolverRefreshIntervalMs=").append(asyncResolverRefreshIntervalMs).append(", ")
-				.append("asyncResolverWarmUpTimeoutMs=").append(asyncResolverWarmUpTimeoutMs).append(", ")
-				.append("asyncExecutorThreadPoolSize=").append(asyncExecutorThreadPoolSize).append(", ")
-				.append("readClusterVip='").append(readClusterVip).append("', ").append("writeClusterVip='")
-				.append(writeClusterVip).append("', ").append("bootstrapResolverForQuery=")
-				.append(bootstrapResolverForQuery).append(", ").append("bootstrapResolverStrategy='")
-				.append(bootstrapResolverStrategy).append("', ").append("applicationsResolverUseIp=")
-				.append(applicationsResolverUseIp).append(", ").append("}").toString();
+			.append(sessionedClientReconnectIntervalSeconds)
+			.append(", ")
+			.append("retryableClientQuarantineRefreshPercentage=")
+			.append(retryableClientQuarantineRefreshPercentage)
+			.append(", ")
+			.append("bootstrapResolverRefreshIntervalSeconds=")
+			.append(bootstrapResolverRefreshIntervalSeconds)
+			.append(", ")
+			.append("applicationsResolverDataStalenessThresholdSeconds=")
+			.append(applicationsResolverDataStalenessThresholdSeconds)
+			.append(", ")
+			.append("asyncResolverRefreshIntervalMs=")
+			.append(asyncResolverRefreshIntervalMs)
+			.append(", ")
+			.append("asyncResolverWarmUpTimeoutMs=")
+			.append(asyncResolverWarmUpTimeoutMs)
+			.append(", ")
+			.append("asyncExecutorThreadPoolSize=")
+			.append(asyncExecutorThreadPoolSize)
+			.append(", ")
+			.append("readClusterVip='")
+			.append(readClusterVip)
+			.append("', ")
+			.append("writeClusterVip='")
+			.append(writeClusterVip)
+			.append("', ")
+			.append("bootstrapResolverForQuery=")
+			.append(bootstrapResolverForQuery)
+			.append(", ")
+			.append("bootstrapResolverStrategy='")
+			.append(bootstrapResolverStrategy)
+			.append("', ")
+			.append("applicationsResolverUseIp=")
+			.append(applicationsResolverUseIp)
+			.append(", ")
+			.append("}")
+			.toString();
 	}
 
 }

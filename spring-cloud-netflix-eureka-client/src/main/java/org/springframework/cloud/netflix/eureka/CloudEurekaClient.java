@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClientConfig;
 import com.netflix.discovery.shared.transport.EurekaHttpClient;
 import com.netflix.discovery.shared.transport.EurekaHttpResponse;
+import com.netflix.discovery.shared.transport.jersey.TransportClientFactories;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -48,22 +49,23 @@ public class CloudEurekaClient extends DiscoveryClient {
 
 	private final AtomicLong cacheRefreshedCount = new AtomicLong(0);
 
-	private ApplicationEventPublisher publisher;
+	private final ApplicationEventPublisher publisher;
 
-	private Field eurekaTransportField;
+	private final Field eurekaTransportField;
 
-	private ApplicationInfoManager applicationInfoManager;
+	private final ApplicationInfoManager applicationInfoManager;
 
-	private AtomicReference<EurekaHttpClient> eurekaHttpClient = new AtomicReference<>();
+	private final AtomicReference<EurekaHttpClient> eurekaHttpClient = new AtomicReference<>();
 
 	public CloudEurekaClient(ApplicationInfoManager applicationInfoManager, EurekaClientConfig config,
-			ApplicationEventPublisher publisher) {
-		this(applicationInfoManager, config, null, publisher);
+			TransportClientFactories transportClientFactories, ApplicationEventPublisher publisher) {
+		this(applicationInfoManager, config, transportClientFactories, null, publisher);
 	}
 
 	public CloudEurekaClient(ApplicationInfoManager applicationInfoManager, EurekaClientConfig config,
-			AbstractDiscoveryClientOptionalArgs<?> args, ApplicationEventPublisher publisher) {
-		super(applicationInfoManager, config, args);
+			TransportClientFactories transportClientFactories, AbstractDiscoveryClientOptionalArgs<?> args,
+			ApplicationEventPublisher publisher) {
+		super(applicationInfoManager, config, transportClientFactories, args);
 		this.applicationInfoManager = applicationInfoManager;
 		this.publisher = publisher;
 		this.eurekaTransportField = ReflectionUtils.findField(DiscoveryClient.class, "eurekaTransport");

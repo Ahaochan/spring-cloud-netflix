@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,14 +41,14 @@ class ApplicationDashboardPathTests {
 	void catalogLoads() {
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<Map> entity = new TestRestTemplate()
-				.getForEntity("http://localhost:" + this.port + "/eureka/apps", Map.class);
+			.getForEntity("http://localhost:" + this.port + "/eureka/apps", Map.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 	@Test
 	void dashboardLoads() {
 		ResponseEntity<String> entity = new TestRestTemplate()
-				.getForEntity("http://localhost:" + this.port + "/dashboard", String.class);
+			.getForEntity("http://localhost:" + this.port + "/dashboard", String.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String body = entity.getBody();
 		// System.err.println(body);
@@ -57,22 +57,22 @@ class ApplicationDashboardPathTests {
 		// The "DS Replicas"
 		assertThat(body.contains("<h1>Instances currently registered with Eureka</h1>")).isTrue();
 		// The Home
-		assertThat(body.contains("<a href=\"/dashboard\">Home</a>")).isTrue();
+		assertThat(body.contains("<a class=\"nav-link px-2\" href=\"/dashboard\">Home</a>")).isTrue();
 		// The Lastn
-		assertThat(body.contains("<a href=\"/dashboard/lastn\">Last")).isTrue();
+		assertThat(body.contains("<a class=\"nav-link px-2\" href=\"/dashboard/lastn\">Last")).isTrue();
 	}
 
 	@Test
 	void cssAvailable() {
 		ResponseEntity<String> entity = new TestRestTemplate()
-				.getForEntity("http://localhost:" + this.port + "/eureka/css/wro.css", String.class);
+			.getForEntity("http://localhost:" + this.port + "/eureka/css/wro.css", String.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 	@Test
 	void jsAvailable() {
 		ResponseEntity<String> entity = new TestRestTemplate()
-				.getForEntity("http://localhost:" + this.port + "/eureka/js/wro.js", String.class);
+			.getForEntity("http://localhost:" + this.port + "/eureka/js/wro.js", String.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 

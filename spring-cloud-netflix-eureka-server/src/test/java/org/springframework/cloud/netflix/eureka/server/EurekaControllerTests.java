@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,10 @@ class EurekaControllerTests {
 		PeerEurekaNodes peerEurekaNodes = mock(PeerEurekaNodes.class);
 		when(peerEurekaNodes.getPeerNodesView()).thenReturn(Collections.<PeerEurekaNode>emptyList());
 
-		InstanceInfo instanceInfo = InstanceInfo.Builder.newBuilder().setAppName("test")
-				.setDataCenterInfo(new MyDataCenterInfo(DataCenterInfo.Name.MyOwn)).build();
+		InstanceInfo instanceInfo = InstanceInfo.Builder.newBuilder()
+			.setAppName("test")
+			.setDataCenterInfo(new MyDataCenterInfo(DataCenterInfo.Name.MyOwn))
+			.build();
 
 		this.infoManager = mock(ApplicationInfoManager.class);
 		this.original = ApplicationInfoManager.getInstance();
@@ -64,8 +66,11 @@ class EurekaControllerTests {
 		when(this.infoManager.getInfo()).thenReturn(instanceInfo);
 
 		Application myapp = new Application("myapp");
-		myapp.addInstance(InstanceInfo.Builder.newBuilder().setAppName("myapp")
-				.setDataCenterInfo(new MyDataCenterInfo(DataCenterInfo.Name.MyOwn)).setInstanceId("myapp:1").build());
+		myapp.addInstance(InstanceInfo.Builder.newBuilder()
+			.setAppName("myapp")
+			.setDataCenterInfo(new MyDataCenterInfo(DataCenterInfo.Name.MyOwn))
+			.setInstanceId("myapp:1")
+			.build());
 
 		ArrayList<Application> applications = new ArrayList<>();
 		applications.add(myapp);
@@ -93,12 +98,15 @@ class EurekaControllerTests {
 	}
 
 	@Test
-	void testStatus() throws Exception {
+	void testStatus() {
 		Map<String, Object> model = new HashMap<>();
 
-		EurekaController controller = new EurekaController(infoManager);
+		EurekaController controller = new EurekaController(infoManager, new EurekaProperties());
 
 		controller.status(new MockHttpServletRequest("GET", "/"), model);
+
+		assertThat((String) model.get("environment")).isEqualTo("test");
+		assertThat((String) model.get("datacenter")).isEqualTo("default");
 
 		Map<String, Object> app = getFirst(model, "apps");
 		Map<String, Object> instanceInfo = getFirst(app, "instanceInfos");

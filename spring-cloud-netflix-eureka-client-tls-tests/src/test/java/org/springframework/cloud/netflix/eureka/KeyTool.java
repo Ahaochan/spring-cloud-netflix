@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,7 @@ public class KeyTool {
 
 	public KeyAndCert signCertificate(KeyPair keyPair, String subject, KeyAndCert signer) throws Exception {
 		X509Certificate certificate = createCert(keyPair.getPublic(), signer.privateKey(), signer.subject(), subject);
-		KeyAndCert result = new KeyAndCert(keyPair, certificate);
-
-		return result;
+		return new KeyAndCert(keyPair, certificate);
 	}
 
 	public KeyPair createKeyPair() throws Exception {

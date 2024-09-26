@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class EurekaClientConfigBeanTests {
 
-	private AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+	private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
 	@AfterEach
 	void init() {
@@ -59,7 +59,7 @@ class EurekaClientConfigBeanTests {
 		this.context.register(PropertyPlaceholderAutoConfiguration.class, TestConfiguration.class);
 		this.context.refresh();
 		assertThat(this.context.getBean(EurekaClientConfigBean.class).getServiceUrl().toString())
-				.isEqualTo("{defaultZone=https://example.com}");
+			.isEqualTo("{defaultZone=https://example.com}");
 		assertThat(getEurekaServiceUrlsForDefaultZone()).isEqualTo("[https://example.com/]");
 	}
 
@@ -67,7 +67,7 @@ class EurekaClientConfigBeanTests {
 	void serviceUrlWithCompositePropertySource() {
 		CompositePropertySource source = new CompositePropertySource("composite");
 		this.context.getEnvironment().getPropertySources().addFirst(source);
-		source.addPropertySource(new MapPropertySource("config", Collections.<String, Object>singletonMap(
+		source.addPropertySource(new MapPropertySource("config", Collections.singletonMap(
 				"eureka.client.serviceUrl.defaultZone",
 				"https://example.com,https://example2.com, https://www.hugedomains.com/domain_profile.cfm?d=example3&e=com")));
 		this.context.register(PropertyPlaceholderAutoConfiguration.class, TestConfiguration.class);

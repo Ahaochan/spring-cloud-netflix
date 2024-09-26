@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,17 @@
 
 package org.springframework.cloud.netflix.eureka.server;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.LeaseInfo;
-import com.netflix.discovery.shared.Application;
-import com.netflix.eureka.registry.PeerAwareInstanceRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.netflix.eureka.server.InstanceRegistryTests.TestApplication;
 import org.springframework.cloud.netflix.eureka.server.event.EurekaInstanceCanceledEvent;
 import org.springframework.cloud.netflix.eureka.server.event.EurekaInstanceRegisteredEvent;
@@ -42,7 +37,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.SmartApplicationListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
+import static org.springframework.cloud.netflix.eureka.server.EurekaInstanceFixture.getInstanceInfo;
+import static org.springframework.cloud.netflix.eureka.server.EurekaInstanceFixture.getLeaseInfo;
 
 /**
  * @author Bartlomiej Slota
@@ -60,19 +56,20 @@ class InstanceRegistryTests {
 
 	private static final int PORT = 8008;
 
-	@SpyBean(PeerAwareInstanceRegistry.class)
+	@Autowired
 	private InstanceRegistry instanceRegistry;
 
 	@BeforeEach
 	void setup() {
 		this.testEvents.applicationEvents.clear();
+		this.instanceRegistry.clearRegistry();
 	}
 
 	@Autowired
 	private TestEvents testEvents;
 
 	@Test
-	void testRegister() throws Exception {
+	void testRegister() {
 		// creating instance info
 		final LeaseInfo leaseInfo = getLeaseInfo();
 		final InstanceInfo instanceInfo = getInstanceInfo(APP_NAME, HOST_NAME, INSTANCE_ID, PORT, leaseInfo);
@@ -83,7 +80,7 @@ class InstanceRegistryTests {
 		assertThat(this.testEvents.applicationEvents.get(0) instanceof EurekaInstanceRegisteredEvent).isTrue();
 		// event details are correct
 		final EurekaInstanceRegisteredEvent registeredEvent = (EurekaInstanceRegisteredEvent) (this.testEvents.applicationEvents
-				.get(0));
+			.get(0));
 		assertThat(registeredEvent.getInstanceInfo()).isEqualTo(instanceInfo);
 		assertThat(registeredEvent.getLeaseDuration()).isEqualTo(leaseInfo.getDurationInSecs());
 		assertThat(registeredEvent.getSource()).isEqualTo(instanceRegistry);
@@ -91,54 +88,54 @@ class InstanceRegistryTests {
 	}
 
 	@Test
-	void testDefaultLeaseDurationRegisterEvent() throws Exception {
+	void testDefaultLeaseDurationRegisterEvent() {
 		// creating instance info
 		final InstanceInfo instanceInfo = getInstanceInfo(APP_NAME, HOST_NAME, INSTANCE_ID, PORT, null);
 		// calling tested method
 		instanceRegistry.register(instanceInfo, false);
 		// instance info duration is set to default
 		final EurekaInstanceRegisteredEvent registeredEvent = (EurekaInstanceRegisteredEvent) (this.testEvents.applicationEvents
-				.get(0));
+			.get(0));
 		assertThat(registeredEvent.getLeaseDuration()).isEqualTo(LeaseInfo.DEFAULT_LEASE_DURATION);
 	}
 
 	@Test
-	void testInternalCancel() throws Exception {
+	void testInternalCancel() {
+		// registering instance info
+		final InstanceInfo instanceInfo = getInstanceInfo(APP_NAME, HOST_NAME, INSTANCE_ID, PORT, null);
+		instanceRegistry.register(instanceInfo, false);
 		// calling tested method
-		instanceRegistry.internalCancel(APP_NAME, HOST_NAME, false);
+		instanceRegistry.internalCancel(APP_NAME, INSTANCE_ID, false);
 		// event of proper type is registered
-		assertThat(this.testEvents.applicationEvents.size()).isEqualTo(1);
-		assertThat(this.testEvents.applicationEvents.get(0) instanceof EurekaInstanceCanceledEvent).isTrue();
+		assertThat(this.testEvents.applicationEvents.size()).isEqualTo(2);
+		assertThat(this.testEvents.applicationEvents.get(0) instanceof EurekaInstanceRegisteredEvent).isTrue();
+		assertThat(this.testEvents.applicationEvents.get(1) instanceof EurekaInstanceCanceledEvent).isTrue();
 		// event details are correct
 		final EurekaInstanceCanceledEvent registeredEvent = (EurekaInstanceCanceledEvent) (this.testEvents.applicationEvents
-				.get(0));
+			.get(1));
 		assertThat(registeredEvent.getAppName()).isEqualTo(APP_NAME);
-		assertThat(registeredEvent.getServerId()).isEqualTo(HOST_NAME);
+		assertThat(registeredEvent.getServerId()).isEqualTo(INSTANCE_ID);
 		assertThat(registeredEvent.getSource()).isEqualTo(instanceRegistry);
 		assertThat(registeredEvent.isReplication()).isFalse();
 	}
 
 	@Test
-	void testRenew() throws Exception {
-		// Creating two instances of the app
+	void testRenew() {
+		// registering two instances of the app
 		final InstanceInfo instanceInfo1 = getInstanceInfo(APP_NAME, HOST_NAME, INSTANCE_ID, PORT, null);
 		final InstanceInfo instanceInfo2 = getInstanceInfo(APP_NAME, HOST_NAME, "my-host-name:8009", 8009, null);
-		// creating application list with an app having two instances
-		final Application application = new Application(APP_NAME, Arrays.asList(instanceInfo1, instanceInfo2));
-		final List<Application> applications = new ArrayList<>();
-		applications.add(application);
-		// stubbing applications list
-		doReturn(applications).when(instanceRegistry).getSortedApplications();
+		instanceRegistry.register(instanceInfo1, false);
+		instanceRegistry.register(instanceInfo2, false);
 		// calling tested method
 		instanceRegistry.renew(APP_NAME, INSTANCE_ID, false);
 		instanceRegistry.renew(APP_NAME, "my-host-name:8009", false);
 		// event of proper type is registered
-		assertThat(this.testEvents.applicationEvents.size()).isEqualTo(2);
-		assertThat(this.testEvents.applicationEvents.get(0) instanceof EurekaInstanceRenewedEvent).isTrue();
-		assertThat(this.testEvents.applicationEvents.get(1) instanceof EurekaInstanceRenewedEvent).isTrue();
+		assertThat(this.testEvents.applicationEvents.size()).isEqualTo(4);
+		assertThat(this.testEvents.applicationEvents.get(2) instanceof EurekaInstanceRenewedEvent).isTrue();
+		assertThat(this.testEvents.applicationEvents.get(3) instanceof EurekaInstanceRenewedEvent).isTrue();
 		// event details are correct
 		final EurekaInstanceRenewedEvent event1 = (EurekaInstanceRenewedEvent) (this.testEvents.applicationEvents
-				.get(0));
+			.get(2));
 		assertThat(event1.getAppName()).isEqualTo(APP_NAME);
 		assertThat(event1.getServerId()).isEqualTo(INSTANCE_ID);
 		assertThat(event1.getSource()).isEqualTo(instanceRegistry);
@@ -146,26 +143,8 @@ class InstanceRegistryTests {
 		assertThat(event1.isReplication()).isFalse();
 
 		final EurekaInstanceRenewedEvent event2 = (EurekaInstanceRenewedEvent) (this.testEvents.applicationEvents
-				.get(1));
+			.get(3));
 		assertThat(event2.getInstanceInfo()).isEqualTo(instanceInfo2);
-	}
-
-	private LeaseInfo getLeaseInfo() {
-		LeaseInfo.Builder leaseBuilder = LeaseInfo.Builder.newBuilder();
-		leaseBuilder.setRenewalIntervalInSecs(10);
-		leaseBuilder.setDurationInSecs(15);
-		return leaseBuilder.build();
-	}
-
-	private InstanceInfo getInstanceInfo(String appName, String hostName, String instanceId, int port,
-			LeaseInfo leaseInfo) {
-		InstanceInfo.Builder builder = InstanceInfo.Builder.newBuilder();
-		builder.setAppName(appName);
-		builder.setHostName(hostName);
-		builder.setInstanceId(instanceId);
-		builder.setPort(port);
-		builder.setLeaseInfo(leaseInfo);
-		return builder.build();
 	}
 
 	@Configuration(proxyBeanMethods = false)

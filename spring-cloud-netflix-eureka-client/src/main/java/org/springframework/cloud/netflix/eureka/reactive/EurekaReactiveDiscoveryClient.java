@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,15 +52,16 @@ public class EurekaReactiveDiscoveryClient implements ReactiveDiscoveryClient {
 	@Override
 	public Flux<ServiceInstance> getInstances(String serviceId) {
 		return Flux.defer(() -> Flux.fromIterable(eurekaClient.getInstancesByVipAddress(serviceId, false)))
-				.map(EurekaServiceInstance::new);
+			.map(EurekaServiceInstance::new);
 	}
 
 	@Override
 	public Flux<String> getServices() {
 		return Flux.defer(() -> Mono.justOrEmpty(eurekaClient.getApplications()))
-				.flatMapIterable(Applications::getRegisteredApplications)
-				.filter(application -> !application.getInstances().isEmpty()).map(Application::getName)
-				.map(String::toLowerCase);
+			.flatMapIterable(Applications::getRegisteredApplications)
+			.filter(application -> !application.getInstances().isEmpty())
+			.map(Application::getName)
+			.map(String::toLowerCase);
 	}
 
 	@Override

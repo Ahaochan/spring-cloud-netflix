@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,19 @@ package org.springframework.cloud.netflix.eureka.config;
 
 import java.util.List;
 
+import com.netflix.discovery.EurekaClientConfig;
 import com.netflix.discovery.endpoint.EndpointUtils;
 import com.netflix.discovery.shared.resolver.DefaultEndpoint;
 
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.cloud.config.client.ConfigServerConfigDataLocationResolver.PropertyResolver;
 import org.springframework.cloud.netflix.eureka.EurekaClientConfigBean;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
-final class HostnameBasedUrlRandomizer implements EndpointUtils.ServiceUrlRandomizer {
+public final class HostnameBasedUrlRandomizer implements EndpointUtils.ServiceUrlRandomizer {
+
+	private static final String EUREKA_INSTANCE_HOSTNAME = "eureka.instance.hostname";
 
 	private final String hostname;
 
@@ -56,19 +60,24 @@ final class HostnameBasedUrlRandomizer implements EndpointUtils.ServiceUrlRandom
 		}
 	}
 
-	static String getEurekaUrl(EurekaClientConfigBean config, String hostname) {
+	public static String getEurekaUrl(EurekaClientConfig config, String hostname) {
 		List<String> urls = EndpointUtils.getDiscoveryServiceUrls(config, EurekaClientConfigBean.DEFAULT_ZONE,
 				new HostnameBasedUrlRandomizer(hostname));
 		return urls.get(0);
 	}
 
-	static DefaultEndpoint randomEndpoint(EurekaClientConfigBean config, Environment env) {
-		String hostname = env.getProperty("eureka.instance.hostname");
+	public static DefaultEndpoint randomEndpoint(EurekaClientConfig config, Environment env) {
+		String hostname = env.getProperty(EUREKA_INSTANCE_HOSTNAME);
 		return new DefaultEndpoint(getEurekaUrl(config, hostname));
 	}
 
-	static DefaultEndpoint randomEndpoint(EurekaClientConfigBean config, Binder binder) {
-		String hostname = binder.bind("eureka.instance.hostname", String.class).orElseGet(() -> null);
+	public static DefaultEndpoint randomEndpoint(EurekaClientConfig config, Binder binder) {
+		String hostname = binder.bind(EUREKA_INSTANCE_HOSTNAME, String.class).orElseGet(() -> null);
+		return new DefaultEndpoint(getEurekaUrl(config, hostname));
+	}
+
+	public static DefaultEndpoint randomEndpoint(EurekaClientConfig config, PropertyResolver propertyResolver) {
+		String hostname = propertyResolver.get(EUREKA_INSTANCE_HOSTNAME, String.class, null);
 		return new DefaultEndpoint(getEurekaUrl(config, hostname));
 	}
 

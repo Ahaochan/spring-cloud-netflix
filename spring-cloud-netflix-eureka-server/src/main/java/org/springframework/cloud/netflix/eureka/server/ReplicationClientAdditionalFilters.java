@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,20 @@ package org.springframework.cloud.netflix.eureka.server;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-import com.sun.jersey.api.client.filter.ClientFilter;
+import jakarta.ws.rs.client.ClientRequestFilter;
 
 /**
  * @author Yuxin Bai
  */
 public class ReplicationClientAdditionalFilters {
 
-	private Collection<ClientFilter> filters;
+	private final Collection<ClientRequestFilter> filters;
 
-	public ReplicationClientAdditionalFilters(Collection<ClientFilter> filters) {
+	public ReplicationClientAdditionalFilters(Collection<ClientRequestFilter> filters) {
 		this.filters = new LinkedHashSet<>(filters);
 	}
 
-	public Collection<ClientFilter> getFilters() {
+	public Collection<ClientRequestFilter> getFilters() {
 		return this.filters;
 	}
 

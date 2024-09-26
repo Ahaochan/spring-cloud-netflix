@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ package org.springframework.cloud.netflix.eureka.server;
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.discovery.EurekaClientConfig;
 import com.netflix.eureka.EurekaServerConfig;
+import com.netflix.eureka.cluster.PeerEurekaNode;
 import com.netflix.eureka.cluster.PeerEurekaNodes;
 import com.netflix.eureka.registry.PeerAwareInstanceRegistry;
 import com.netflix.eureka.resources.ServerCodecs;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -43,7 +45,8 @@ class EurekaCustomPeerNodesTests {
 	@Test
 	void testCustomPeerNodesShouldTakePrecedenceOverDefault() {
 		assertThat(peerEurekaNodes instanceof CustomEurekaPeerNodes)
-				.as("PeerEurekaNodes should be the user created one").isTrue();
+			.as("PeerEurekaNodes should be the user created one")
+			.isTrue();
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -67,6 +70,11 @@ class EurekaCustomPeerNodesTests {
 				EurekaClientConfig clientConfig, ServerCodecs serverCodecs,
 				ApplicationInfoManager applicationInfoManager) {
 			super(registry, serverConfig, clientConfig, serverCodecs, applicationInfoManager);
+		}
+
+		@Override
+		protected PeerEurekaNode createPeerEurekaNode(String peerEurekaNodeUrl) {
+			return Mockito.mock(PeerEurekaNode.class);
 		}
 
 	}

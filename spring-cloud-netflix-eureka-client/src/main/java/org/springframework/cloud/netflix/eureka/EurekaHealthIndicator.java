@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class EurekaHealthIndicator implements DiscoveryHealthIndicator {
 		if (AopUtils.isAopProxy(eurekaClient)) {
 			discoveryClient = ProxyUtils.getTargetObject(eurekaClient);
 		}
-		else if (DiscoveryClient.class.isInstance(eurekaClient)) {
+		else if (eurekaClient instanceof DiscoveryClient) {
 			discoveryClient = (DiscoveryClient) eurekaClient;
 		}
 		return discoveryClient;

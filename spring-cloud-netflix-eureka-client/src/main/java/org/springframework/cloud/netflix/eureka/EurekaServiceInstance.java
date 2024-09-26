@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static com.netflix.appinfo.InstanceInfo.PortType.SECURE;
  */
 public class EurekaServiceInstance implements ServiceInstance {
 
-	private InstanceInfo instance;
+	private final InstanceInfo instance;
 
 	public EurekaServiceInstance(InstanceInfo instance) {
 		Assert.notNull(instance, "Service instance required");

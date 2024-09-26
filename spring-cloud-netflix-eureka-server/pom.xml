@@ -5,15 +5,17 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-netflix</artifactId>
-		<version>3.1.0-SNAPSHOT</version>
+		<version>4.2.0-SNAPSHOT</version>
 		<relativePath>..</relativePath> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>spring-cloud-netflix-eureka-server</artifactId>
 	<name>Spring Cloud Netflix Eureka Server</name>
 	<url>https://projects.spring.io/spring-cloud/</url>
 	<properties>
-		<wro4j.version>1.8.0</wro4j.version>
+		<wro4j.version>1.10.1</wro4j.version>
 		<wiremock.version>2.27.2</wiremock.version>
+		<!-- FIXME: 4.0.0 -->
+		<duplicate-finder-maven-plugin.skip>true</duplicate-finder-maven-plugin.skip>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -48,33 +50,33 @@
 		</dependency>
 		<dependency>
 			<groupId>com.netflix.eureka</groupId>
-			<artifactId>eureka-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-servlet</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-server</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-client</artifactId>
+			<artifactId>eureka-client-jersey3</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.netflix.eureka</groupId>
-			<artifactId>eureka-core</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>blitz4j</artifactId>
-					<groupId>com.netflix.blitz4j</groupId>
-				</exclusion>
-			</exclusions>
+			<artifactId>eureka-core-jersey3</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.hk2</groupId>
+			<artifactId>spring-bridge</artifactId>
+			<!-- FIXME: 4.0 -->
+			<version>3.1.1</version>
 		</dependency>
 		<!-- Eureka deps that are now optional in eureka -->
 		<dependency>
@@ -92,14 +94,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.github.tomakehurst</groupId>
-			<artifactId>wiremock-jre8-standalone</artifactId>
-			<version>${wiremock.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-rsa</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -176,20 +172,21 @@
 					<contextFolder>${basedir}/src/main/wro</contextFolder>
 				</configuration>
 				<dependencies>
+					<!-- https://github.com/wro4j/wro4j/issues/1129 -->
 					<dependency>
-						<groupId>org.webjars</groupId>
+						<groupId>org.webjars.npm</groupId>
+						<artifactId>glob</artifactId>
+						<version>7.2.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.webjars.npm</groupId>
 						<artifactId>jquery</artifactId>
-						<version>3.5.1</version>
-					</dependency>
-					<dependency>
-						<groupId>org.webjars</groupId>
-						<artifactId>bootstrap</artifactId>
-						<version>3.2.0</version>
-					</dependency>
-					<dependency>
-						<groupId>org.mockito</groupId>
-						<artifactId>mockito-core</artifactId>
 						<version>3.6.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.webjars.npm</groupId>
+						<artifactId>bootstrap</artifactId>
+						<version>5.1.3</version>
 					</dependency>
 				</dependencies>
 			</plugin>
